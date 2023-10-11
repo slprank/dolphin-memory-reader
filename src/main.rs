@@ -6,17 +6,11 @@
 
 // #![windows_subsystem = "windows"]
 
-use single_instance::SingleInstance;
 
-mod config;
-mod discord;
-mod tray;
-mod rank;
 mod util;
 mod melee;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     // TODO: Provide PID, Base Address and RegionSize if possible
     let mut client = melee::MeleeClient::new();
 

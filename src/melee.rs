@@ -1,11 +1,10 @@
-use std::{fmt::Display};
+use std::fmt::Display;
 
 use num_enum::TryFromPrimitive;
-use strum::{IntoEnumIterator};
+use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter};
-use tokio_util::sync::CancellationToken;
 
-use crate::{util::{current_unix_time, sleep}, melee::{stage::MeleeStage, character::MeleeCharacter}, config::{CONFIG}, tray::MeleeTrayEvent};
+use crate::melee::{stage::MeleeStage, character::MeleeCharacter};
 
 use self::{dolphin_mem::{DolphinMemory, util::R13}, msrb::MSRBOffset, multiman::MultiManVariant};
 
@@ -14,7 +13,6 @@ mod msrb;
 mod multiman;
 pub mod stage;
 pub mod character;
-pub mod dolphin_user;
 
 // reference: https://github.com/akaneia/m-ex/blob/master/MexTK/include/match.h#L11-L14
 #[derive(PartialEq, EnumIter, Clone, Copy)]
@@ -71,7 +69,7 @@ impl Display for MeleeScene {
             Self::SlippiOnline(None) => write!(f, "Slippi Online"),
             Self::HomeRunContest => write!(f, "Home-Run Contest"),
             Self::TargetTest(stage_opt) => {
-                if stage_opt.is_some() && CONFIG.with_ref(|c| c.stadium.btt.show_stage_name) {
+                if stage_opt.is_some() {
                     write!(f, "{}", stage_opt.unwrap())
                 } else {
                     write!(f, "Target Test")
