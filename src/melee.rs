@@ -166,4 +166,5 @@ impl MeleeClient {
         const PLAYER_BLOCKS: [u32; 4] = [0x80453080, 0x80453F10, 0x80454DA0, 0x80455C30];
         self.mem.read::<u8>(PLAYER_BLOCKS[player_id as usize] + 0x07).and_then(|v| MeleeCharacter::try_from(v).ok())
     }
+
 }

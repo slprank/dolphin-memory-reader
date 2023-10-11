@@ -20,6 +20,7 @@ const GC_RAM_SIZE: usize = 0x2000000;
 const MEM_MAPPED: u32 = 0x40000;
 
 
+
 pub struct DolphinMemory {
     process_handle: Option<HANDLE>,
     dolphin_base_addr: Option<*mut c_void>,
