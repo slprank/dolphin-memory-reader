@@ -13,7 +13,7 @@ use windows::Win32::System::ProcessStatus::PSAPI_WORKING_SET_EX_INFORMATION;
 use windows::Win32::System::ProcessStatus::QueryWorkingSetEx;
 use windows::Win32::{System::{Diagnostics::ToolHelp::{CreateToolhelp32Snapshot, PROCESSENTRY32, TH32CS_SNAPPROCESS, Process32Next}, Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ, GetExitCodeProcess}}, Foundation::{STILL_ACTIVE, HANDLE, CloseHandle}};
 
-const VALID_PROCESS_NAMES: &'static [&'static str] = &["Dolphin.exe", "Slippi Dolphin.exe", "DolphinWx.exe", "DolphinQt2.exe"];
+const VALID_PROCESS_NAMES: &'static [&'static str] = &["Dolphin.exe", "Slippi Dolphin.exe", "DolphinWx.exe", "DolphinQt2.exe", "Citrus Dolphin.exe",];
 const GC_RAM_START: u32 = 0x80000000;
 const GC_RAM_END: u32 = 0x81800000;
 const GC_RAM_SIZE: usize = 0x2000000;
