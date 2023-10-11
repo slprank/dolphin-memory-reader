@@ -10,14 +10,10 @@
 extern crate serde;
 extern crate serde_json;
 
-mod util;
-mod melee;
+mod dolphin_mem;
 
 fn main() {
     // TODO: Provide PID, Base Address and RegionSize if possible
-    let mut client = melee::MeleeClient::new();
-
-
-
+    let mut client = dolphin_mem::DolphinMemory::new();
     // Return Memory Value
 }
