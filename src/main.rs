@@ -6,6 +6,10 @@
 
 // #![windows_subsystem = "windows"]
 
+#![feature(generic_const_exprs)]
+
+#[macro_use]
+extern crate serde_derive;
 
 mod util;
 mod melee;

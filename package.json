@@ -1,0 +1,27 @@
+{
+  "name": "dolphin-memory-reader",
+  "version": "2.0.0",
+  "description": "Package for node that reads bytes from memory for a given process",
+  "main": "index.node",
+  "scripts": {
+    "build": "cargo-cp-artifact -nc index.node -- cargo build --message-format=json-render-diagnostics",
+    "build-debug": "npm run build --",
+    "build-release": "npm run build -- --release",
+    "install": "npm run build-release",
+    "test": "cargo test"
+  },
+  "author": "sindrevatnaland97@gmail.com",
+  "url": "https://github.com/slprank/dolphin-memory-reader",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/slprank/dolphin-memory-reader"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "cargo-cp-artifact": "0.1.8"
+  },
+  "keywords": [
+    "memory",
+    "process"
+  ]
+}
