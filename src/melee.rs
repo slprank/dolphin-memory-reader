@@ -88,6 +88,7 @@ impl Display for MeleeScene {
     }
 }
 
+
 impl MeleeClient {
     pub fn new() -> Self {
         MeleeClient { mem: DolphinMemory::new() }
