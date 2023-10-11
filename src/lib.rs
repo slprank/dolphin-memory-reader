@@ -7,13 +7,17 @@
 // #![windows_subsystem = "windows"]
 #![feature(generic_const_exprs)]
 
+use neon::prelude::*;
+
 extern crate serde;
 extern crate serde_json;
 
 mod dolphin_mem;
 
-fn main() {
-    // TODO: Provide PID, Base Address and RegionSize if possible
-    let mut client = dolphin_mem::DolphinMemory::new();
-    // Return Memory Value
+
+#[neon::main]
+fn main(mut cx: ModuleContext) -> NeonResult<()> {
+    cx.export_function("new", dolphin_mem::DolphinMemory::js_new)?;
+    cx.export_function("read", dolphin_mem::DolphinMemory::js_read)?;
+    cx.export_function("readString", dolphin_mem::DolphinMemory::js_read_string)?;
 }
