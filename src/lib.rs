@@ -17,7 +17,9 @@ mod dolphin_mem;
 
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
-    cx.export_function("new", dolphin_mem::DolphinMemory::js_new)?;
-    cx.export_function("read", dolphin_mem::DolphinMemory::js_read)?;
-    cx.export_function("readString", dolphin_mem::DolphinMemory::js_read_string)?;
+    cx.export_function("memoryNew", dolphin_mem::DolphinMemory::js_new)?;
+    /*
+    cx.export_function("memoryRead", dolphin_mem::DolphinMemory::js_read)?;
+    cx.export_function("memoryReadString", dolphin_mem::DolphinMemory::js_read_string)?;
+    */
 }

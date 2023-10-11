@@ -3,6 +3,11 @@ use std::mem;
 use std::str::from_utf8_unchecked;
 
 use encoding_rs::SHIFT_JIS;
+use neon::prelude::Context;
+use neon::prelude::FunctionContext;
+use neon::result::JsResult;
+use neon::types::Finalize;
+use neon::types::JsBox;
 use windows::Win32::Foundation::ERROR_PARTIAL_COPY;
 use windows::Win32::Foundation::GetLastError;
 use windows::Win32::System::Diagnostics::Debug::ReadProcessMemory;
@@ -23,7 +28,7 @@ const MEM_MAPPED: u32 = 0x40000;
 
 pub struct DolphinMemory {
     process_handle: Option<HANDLE>,
-    dolphin_base_addr: Option<*mut c_void>,
+    dolphin_base_addr: Option<usize>,
     dolphin_addr_size: Option<usize>
 }
 
@@ -203,7 +208,7 @@ impl DolphinMemory {
 
                     if QueryWorkingSetEx(self.process_handle.unwrap(), &mut wsinfo as *mut _ as *mut c_void, mem::size_of::<PSAPI_WORKING_SET_EX_INFORMATION>().try_into().unwrap()).as_bool() {
                         if (wsinfo.VirtualAttributes.Flags & 1) == 1 && info.BaseAddress != 0 as *mut c_void {
-                            self.dolphin_base_addr = Some(info.BaseAddress);
+                            self.dolphin_base_addr = Some(info.BaseAddress as usize);
                             self.dolphin_addr_size = Some(info.RegionSize);
 
                             println!("Dolphin Base Address: {:?}", self.dolphin_base_addr);
@@ -227,7 +232,18 @@ impl DolphinMemory {
         self.dolphin_base_addr = None;
         self.dolphin_addr_size = None;
     }
+
+    
 }
+
+impl DolphinMemory {
+    pub fn js_new(mut cx: FunctionContext) -> JsResult<JsBox<DolphinMemory>> {
+        let memory = DolphinMemory::new();
+        Ok(cx.boxed(memory))
+    }
+}
+
+impl Finalize for DolphinMemory {}
 
 pub mod util {
     macro_rules! R13 {($offset:expr) => { 0x804db6a0 - $offset }}

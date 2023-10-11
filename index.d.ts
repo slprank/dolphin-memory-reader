@@ -1,6 +1,8 @@
-export declare function getPid(): number | null;
-export declare function getMemoryBaseAddress(pid: number | null): number | null;
-export declare function getMemoryAddressSize(pid: number | null): number | null;
+declare class Memory {
+  constructor();
 
-export declare function readMemory(pid: number, address: number, length: number): number[];
-export declare function readMemoryWithDataSize(pid: number, address: number, length: number, dataTypeSize: DataTypeSize): number[];
+  read(address: number, length: number): number;
+  readString(address: number, chars: number): string;
+}
+
+export = Memory;
