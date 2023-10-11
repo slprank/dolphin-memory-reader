@@ -4,9 +4,9 @@
   "description": "Package for node that reads bytes from memory for a given process",
   "main": "index.node",
   "scripts": {
-    "build": "cargo-cp-artifact -nc index.node -- cargo build --message-format=json-render-diagnostics",
+    "build": "cargo build --message-format=json-render-diagnostics --out-dir . -Z unstable-options",
     "build-debug": "npm run build --",
-    "build-release": "npm run build -- --release",
+    "build-release": "npm run build -- --release && mv dolphin-memory-reader index.node",
     "install": "npm run build-release",
     "test": "cargo test"
   },
