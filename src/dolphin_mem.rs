@@ -8,6 +8,9 @@ use neon::prelude::FunctionContext;
 use neon::result::JsResult;
 use neon::types::Finalize;
 use neon::types::JsBox;
+use neon::types::JsNumber;
+use neon::types::JsPromise;
+use num_traits::FromPrimitive;
 use windows::Win32::Foundation::ERROR_PARTIAL_COPY;
 use windows::Win32::Foundation::GetLastError;
 use windows::Win32::System::Diagnostics::Debug::ReadProcessMemory;
@@ -17,6 +20,8 @@ use windows::Win32::System::ProcessStatus::PSAPI_WORKING_SET_EX_BLOCK;
 use windows::Win32::System::ProcessStatus::PSAPI_WORKING_SET_EX_INFORMATION;
 use windows::Win32::System::ProcessStatus::QueryWorkingSetEx;
 use windows::Win32::{System::{Diagnostics::ToolHelp::{CreateToolhelp32Snapshot, PROCESSENTRY32, TH32CS_SNAPPROCESS, Process32Next}, Threading::{OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ, GetExitCodeProcess}}, Foundation::{STILL_ACTIVE, HANDLE, CloseHandle}};
+
+extern crate num;
 
 const VALID_PROCESS_NAMES: &'static [&'static str] = &["Dolphin.exe", "Slippi Dolphin.exe", "DolphinWx.exe", "DolphinQt2.exe", "Citrus Dolphin.exe",];
 const GC_RAM_START: u32 = 0x80000000;
@@ -94,14 +99,13 @@ impl DolphinMemory {
         let mut status: u32 = 0;
         unsafe {
             if GetExitCodeProcess(self.process_handle.unwrap(), &mut status as *mut _).as_bool() && status as i32 != STILL_ACTIVE.0 {
-                self.reset();
                 return false;
             }
         }
         return true;
     }
 
-    pub fn read<T: Sized>(&mut self, addr: u32) -> Option<T> where [u8; mem::size_of::<T>()]:{
+    pub fn read<T: Sized>(self, addr: u32) -> Option<T> where [u8; mem::size_of::<T>()]:{
         if !self.has_process() || (!self.has_gamecube_ram_offset() && !self.find_gamecube_ram_offset()) {
             return None;
         }
@@ -128,16 +132,13 @@ impl DolphinMemory {
             } else {
                 let err = GetLastError().0;
                 println!("[MEMORY] Failed reading from address {:#08X} ERROR {}", addr, err);
-                if err == ERROR_PARTIAL_COPY.0 { // game probably closed, reset the dolphin ram offset
-                    self.dolphin_addr_size = None;
-                    self.dolphin_base_addr = None;
-                }
+
                 return None;
             }
         }
     }
 
-    pub fn read_string<const LEN: usize>(&mut self, addr: u32) -> Option<String> where [(); mem::size_of::<[u8; LEN]>()]:{
+    pub fn read_string<const LEN: usize>(self, addr: u32) -> Option<String> where [(); mem::size_of::<[u8; LEN]>()]:{
         let res = self.read::<[u8; LEN]>(addr);
         if res.is_none() {
             return None;
@@ -186,7 +187,7 @@ impl DolphinMemory {
 
     }*/
 
-    fn find_gamecube_ram_offset(&mut self) -> bool {
+    fn find_gamecube_ram_offset(self) -> bool {
         if !self.has_process() {
             return false;
         }
@@ -227,19 +228,56 @@ impl DolphinMemory {
         self.dolphin_base_addr.is_some()
     }
 
-    fn reset(&mut self) {
-        self.process_handle = None;
-        self.dolphin_base_addr = None;
-        self.dolphin_addr_size = None;
-    }
-
     
+}
+
+#[derive(FromPrimitive)]
+enum ByteSize {
+   U8,
+   U16,
+   U32,
 }
 
 impl DolphinMemory {
     pub fn js_new(mut cx: FunctionContext) -> JsResult<JsBox<DolphinMemory>> {
         let memory = DolphinMemory::new();
         Ok(cx.boxed(memory))
+    }
+    
+    pub fn js_read(mut cx: FunctionContext) -> JsResult<JsNumber> {
+        let address_js = cx.argument::<JsNumber>(0)?.value(&mut cx);
+        let byte_size_js = cx.argument::<JsNumber>(1)?.value(&mut cx);
+
+        let address = u32::from_f64(address_js).unwrap();
+        let byte_size = ByteSize::from_f64(byte_size_js).unwrap();
+
+        let memory = cx.this().downcast_or_throw::<JsBox<DolphinMemory>, _>(&mut cx)?;
+
+        let memory_value = match byte_size {
+            ByteSize::U8 => {
+                let value = memory.read::<u8>(address);
+                match value {
+                  Some(value_js) => cx.number(value_js),
+                  None => {return cx.throw_error("rrRrorRRR")}
+                }
+            }
+            ByteSize::U16 => {
+                let value = memory.read::<u8>(address);
+                match value {
+                  Some(value_js) => cx.number(value_js),
+                  None => {return cx.throw_error("rrRrorRRR")}
+                }
+            }
+            ByteSize::U32 => {
+                let value = memory.read::<u8>(address);
+                match value {
+                  Some(value_js) => cx.number(value_js),
+                  None => {return cx.throw_error("rrRrorRRR")}
+                }
+            }
+        };
+
+        Ok(memory_value)
     }
 }
 

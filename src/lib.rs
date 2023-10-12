@@ -7,6 +7,9 @@
 // #![windows_subsystem = "windows"]
 #![feature(generic_const_exprs)]
 
+#[macro_use]
+extern crate num_derive;
+
 use neon::prelude::*;
 
 extern crate serde;
@@ -18,9 +21,7 @@ mod dolphin_mem;
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("memoryNew", dolphin_mem::DolphinMemory::js_new)?;
-    Ok(())
-    /*
     cx.export_function("memoryRead", dolphin_mem::DolphinMemory::js_read)?;
-    cx.export_function("memoryReadString", dolphin_mem::DolphinMemory::js_read_string)?;
-    */
+    //cx.export_function("memoryReadString", dolphin_mem::DolphinMemory::js_read_string)?;
+    Ok(())
 }
