@@ -238,7 +238,7 @@ impl DolphinMemory {
 
 impl DolphinMemory {
     pub fn js_new(mut cx: FunctionContext) -> JsResult<JsBox<DolphinMemory>> {
-        let memory = DolphinMemory::new(&mut cx);
+        let memory = DolphinMemory::new();
         Ok(cx.boxed(memory))
     }
 }

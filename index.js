@@ -1,7 +1,7 @@
-const { memoryNew, memoryRead } = require("./index.node");
+const { memoryNew, memoryRead, memoryReadString } = require("./index.node");
 
 // Wrapper class for the boxed `Database` for idiomatic JavaScript usage
-class Memory {
+class DolphinMemory {
   constructor() {
     this.memory = memoryNew();
   }
@@ -14,4 +14,4 @@ class Memory {
   }
 }
 
-module.exports = Memory;
+module.exports = DolphinMemory;
