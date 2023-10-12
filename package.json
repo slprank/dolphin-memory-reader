@@ -1,7 +1,7 @@
 {
   "name": "dolphin-memory-reader",
-  "version": "2.0.0",
-  "description": "Package for node that reads bytes from memory for a given process",
+  "version": "0.1.0",
+  "description": "Node module that can read memory from the Dolphin Emulator",
   "main": "index.node",
   "scripts": {
     "build": "cargo build --message-format=json-render-diagnostics --out-dir . -Z unstable-options",
