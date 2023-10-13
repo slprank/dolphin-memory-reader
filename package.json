@@ -6,8 +6,8 @@
   "scripts": {
     "build": "cargo build --message-format=json-render-diagnostics --out-dir . -Z unstable-options",
     "build-debug": "npm run build",
-    "build-release": "npm run build -- --release && mv libdolphin_memory_reader.dylib index.node",
-    "install": "rustup default nightly && npm run build-release && ls",
+    "build-release": "npm run build -- --release && ls && mv libdolphin_memory_reader.dylib index.node",
+    "install": "rustup default nightly && npm run build-release",
     "test": "cargo +nightly test"
   },
   "author": "sindrevatnaland97@gmail.com",

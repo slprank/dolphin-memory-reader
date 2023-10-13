@@ -2,7 +2,6 @@ use std::ffi::c_void;
 use std::mem;
 use std::str::from_utf8_unchecked;
 
-use encoding_rs::SHIFT_JIS;
 use neon::prelude::Context;
 use neon::prelude::FunctionContext;
 use neon::result::JsResult;
