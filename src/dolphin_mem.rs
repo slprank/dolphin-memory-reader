@@ -130,25 +130,6 @@ impl DolphinMemory {
         DolphinMemory { process_handle: process_handle, dolphin_base_addr: dolphin_base_address, dolphin_addr_size: dolphin_address_size }
     }
 
-    
-    fn has_process(&self) -> bool {
-        self.process_handle.is_some()
-    }
-
-    pub fn check_process_running(process_handle: Option<HANDLE>) -> bool {
-        if process_handle.is_none() {
-            return false;
-        }
-
-        let mut status: u32 = 0;
-        unsafe {
-            if GetExitCodeProcess(process_handle.unwrap(), &mut status as *mut _).as_bool() && status as i32 != STILL_ACTIVE.0 {
-                return false;
-            }
-        }
-        return true;
-    }
-
     pub fn read<T: Sized>(self, addr: u32) -> Option<T> where [u8; mem::size_of::<T>()]:{
         let mut addr = addr;
         if addr >= GC_RAM_START && addr <= GC_RAM_END {
@@ -178,69 +159,57 @@ impl DolphinMemory {
         }
     }
 
-    pub fn read_string<const LEN: usize>(self, addr: u32) -> Option<String> where [(); mem::size_of::<[u8; LEN]>()]:{
-        let res = self.read::<[u8; LEN]>(addr);
-        if res.is_none() {
-            return None;
-        }
+    // pub fn read_string<const LEN: usize>(self, addr: u32) -> Option<String> where [(); mem::size_of::<[u8; LEN]>()]:{
+    //     let res = self.read::<[u8; LEN]>(addr);
+    //     if res.is_none() {
+    //         return None;
+    //     }
 
-        let mut raw = res.unwrap();
-        raw.reverse(); // we apparently have to reverse it again due to how the string is gathered
+    //     let mut raw = res.unwrap();
+    //     raw.reverse(); // we apparently have to reverse it again due to how the string is gathered
 
-        return match std::str::from_utf8(&raw) {
-            Ok(v) => Some(v.trim_end_matches(char::from(0)).into()),
-            Err(e) => {
-                println!("Invalid utf-8 string => {:?} | {}", res.unwrap(), e.to_string());
-                None
-            }
-        };
-    }
+    //     return match std::str::from_utf8(&raw) {
+    //         Ok(v) => Some(v.trim_end_matches(char::from(0)).into()),
+    //         Err(e) => {
+    //             println!("Invalid utf-8 string => {:?} | {}", res.unwrap(), e.to_string());
+    //             None
+    //         }
+    //     };
+    // }
 
-    pub fn read_string_shift_jis<const LEN: usize>(&mut self, addr: u32) -> Option<String> where [(); mem::size_of::<[u8; LEN]>()]:{
-        let res = self.read::<[u8; LEN]>(addr);
-        if res.is_none() {
-            return None;
-        }
+    // pub fn read_string_shift_jis<const LEN: usize>(&mut self, addr: u32) -> Option<String> where [(); mem::size_of::<[u8; LEN]>()]:{
+    //     let res = self.read::<[u8; LEN]>(addr);
+    //     if res.is_none() {
+    //         return None;
+    //     }
 
-        let mut raw = res.unwrap();
-        raw.reverse(); // we apparently have to reverse it again due to how the string is gathered
+    //     let mut raw = res.unwrap();
+    //     raw.reverse(); // we apparently have to reverse it again due to how the string is gathered
 
-        let (dec_res, _enc, errors) = SHIFT_JIS.decode(&raw);
-        if errors {
-            println!("Invalid shift-jis string => {:?}", res.unwrap())
-        }
-        return Some(dec_res.as_ref().trim_end_matches(char::from(0)).to_string());
-    }
+    //     let (dec_res, _enc, errors) = SHIFT_JIS.decode(&raw);
+    //     if errors {
+    //         println!("Invalid shift-jis string => {:?}", res.unwrap())
+    //     }
+    //     return Some(dec_res.as_ref().trim_end_matches(char::from(0)).to_string());
+    // }
 
-    pub fn pointer_indirection(&mut self, addr: u32, amount: u32) -> Option<u32> {
-        let mut curr = self.read::<u32>(addr);
-        for n in 2..=amount {
-            if curr.is_none() {
-                return None;
-            }
-            curr = self.read::<u32>(curr.unwrap());
-        }
-        curr
-    }
-
-    /*pub fn write(&self) {
-
-    }*/
-
-    
-
-    fn has_gamecube_ram_offset(&self) -> bool {
-        self.dolphin_base_addr.is_some()
-    }
-
-    
+    // pub fn pointer_indirection(&mut self, addr: u32, amount: u32) -> Option<u32> {
+    //     let mut curr = self.read::<u32>(addr);
+    //     for n in 2..=amount {
+    //         if curr.is_none() {
+    //             return None;
+    //         }
+    //         curr = self.read::<u32>(curr.unwrap());
+    //     }
+    //     curr
+    // }    
 }
 
 #[derive(FromPrimitive)]
 enum ByteSize {
-   U8,
-   U16,
-   U32,
+   U8 = 8,
+   U16 = 16,
+   U32 = 32,
 }
 
 impl DolphinMemory {
