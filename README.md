@@ -11,7 +11,8 @@ readFromMemory() {
 
     const memory = new DolphinMemory();
 
-    const address = 0x80000000;
+    // P1 Selected Character In CSS
+    const address = 0x8043208b;
     const byte = memory.read(address, ByteSize.U8);
 
     console.log("Byte from memory", byte);
