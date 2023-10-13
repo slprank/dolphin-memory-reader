@@ -3,7 +3,7 @@
 ### Initialize
 
 ```ts
-import DolphinMemory from "dolphin-memory-reader";
+import DolphinMemory, { ByteSize } from "dolphin-memory-reader";
 import os from "os"
 
 readFromMemory() {
@@ -21,7 +21,7 @@ readFromMemory() {
 
 ### Info
 
-Package is written in rust and is currently only supported for windows tested on `Super Smash Bros Melee`
+Package is written in rust and is currently only supported for windows and tested on `Super Smash Bros Melee`
 
 ### Contribute?
 
