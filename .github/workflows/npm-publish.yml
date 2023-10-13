@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-      - run: npm install:git
+      - run: npm run install:git
       - run: npm test
       - run: npm publish --access public
         env:
