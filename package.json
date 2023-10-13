@@ -17,9 +17,6 @@
     "url": "https://github.com/slprank/dolphin-memory-reader"
   },
   "license": "MIT",
-  "dependencies": {
-    "cargo-cp-artifact": "0.1.8"
-  },
   "keywords": [
     "memory",
     "process"
@@ -30,6 +27,7 @@
     "index.d.ts"
   ],
   "devDependencies": {
+    "cargo-cp-artifact": "0.1.8",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }
