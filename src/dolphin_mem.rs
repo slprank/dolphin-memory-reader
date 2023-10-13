@@ -158,51 +158,6 @@ impl DolphinMemory {
             }
         }
     }
-
-    // pub fn read_string<const LEN: usize>(self, addr: u32) -> Option<String> where [(); mem::size_of::<[u8; LEN]>()]:{
-    //     let res = self.read::<[u8; LEN]>(addr);
-    //     if res.is_none() {
-    //         return None;
-    //     }
-
-    //     let mut raw = res.unwrap();
-    //     raw.reverse(); // we apparently have to reverse it again due to how the string is gathered
-
-    //     return match std::str::from_utf8(&raw) {
-    //         Ok(v) => Some(v.trim_end_matches(char::from(0)).into()),
-    //         Err(e) => {
-    //             println!("Invalid utf-8 string => {:?} | {}", res.unwrap(), e.to_string());
-    //             None
-    //         }
-    //     };
-    // }
-
-    // pub fn read_string_shift_jis<const LEN: usize>(&mut self, addr: u32) -> Option<String> where [(); mem::size_of::<[u8; LEN]>()]:{
-    //     let res = self.read::<[u8; LEN]>(addr);
-    //     if res.is_none() {
-    //         return None;
-    //     }
-
-    //     let mut raw = res.unwrap();
-    //     raw.reverse(); // we apparently have to reverse it again due to how the string is gathered
-
-    //     let (dec_res, _enc, errors) = SHIFT_JIS.decode(&raw);
-    //     if errors {
-    //         println!("Invalid shift-jis string => {:?}", res.unwrap())
-    //     }
-    //     return Some(dec_res.as_ref().trim_end_matches(char::from(0)).to_string());
-    // }
-
-    // pub fn pointer_indirection(&mut self, addr: u32, amount: u32) -> Option<u32> {
-    //     let mut curr = self.read::<u32>(addr);
-    //     for n in 2..=amount {
-    //         if curr.is_none() {
-    //             return None;
-    //         }
-    //         curr = self.read::<u32>(curr.unwrap());
-    //     }
-    //     curr
-    // }    
 }
 
 #[derive(FromPrimitive)]
@@ -253,31 +208,7 @@ impl DolphinMemory {
 
         Ok(memory_value)
     }
-    
-    // pub fn js_read_string(mut cx: FunctionContext) -> JsResult<JsString> {
-    //     let address_js = cx.argument::<JsNumber>(0)?.value(&mut cx);
-    //     let chars_js= cx.argument::<JsNumber>(1)?.value(&mut cx);
 
-    //     let address = u32::from_f64(address_js).unwrap();
-    //     let chars = usize::from_f64(chars_js).unwrap();
-
-    //     let memory = cx.this().downcast_or_throw::<JsBox<DolphinMemory>, _>(&mut cx)?;
-
-    //     let memory_string = {
-    //         let value = memory.read_string::<chars>(address);
-    //             match value {
-    //               Some(value_js) => cx.string(value_js),
-    //               None => {return cx.throw_error("rrRrorRRR")}
-    //             }
-    //     };
-
-    //     Ok(memory_string)
-    // }
 }
 
 impl Finalize for DolphinMemory {}
-
-pub mod util {
-    macro_rules! R13 {($offset:expr) => { 0x804db6a0 - $offset }}
-    pub(crate) use R13;
-}

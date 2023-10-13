@@ -1,5 +1,4 @@
-const { ByteSize } = require(".");
-const { memoryNew, memoryRead, memoryReadString } = require("./index.node");
+const { memoryNew, memoryRead } = require("./index.node");
 
 // Wrapper class for the boxed `Database` for idiomatic JavaScript usage
 class DolphinMemory {
@@ -7,7 +6,7 @@ class DolphinMemory {
     this.memory = memoryNew();
   }
 
-  read(address, byteSize = ByteSize.U8) {
+  read(address, byteSize = 8) {
     return memoryRead.call(this.memory, address, byteSize);
   }
   // readString(address, chars) {
