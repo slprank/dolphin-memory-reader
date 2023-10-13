@@ -4,13 +4,18 @@
 
 ```ts
 import DolphinMemory from "dolphin-memory-reader";
+import os from "os"
 
-const memory = new DolphinMemory();
+readFromMemory() {
+    if (os.platform() !== "win32") return;
 
-const address = 0x80000000;
-const byte = memory.read(address, ByteSize.U8);
+    const memory = new DolphinMemory();
 
-console.log("Byte from memory", byte);
+    const address = 0x80000000;
+    const byte = memory.read(address, ByteSize.U8);
+
+    console.log("Byte from memory", byte);
+}
 ```
 
 ### Info
