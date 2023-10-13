@@ -6,7 +6,7 @@
   "scripts": {
     "build": "cargo build --message-format=json-render-diagnostics --out-dir . -Z unstable-options",
     "build-debug": "npm run build",
-    "build-release": "npm run build -- --release && ls && mv dolphin_memory_reader.dll.lib index.node",
+    "build-release": "npm run build -- --release && ls && mv dolphin_memory_reader.dll index.node",
     "install:git": "rustup default nightly && npm run build-release",
     "test": "cargo +nightly test"
   },
