@@ -30,8 +30,8 @@ const MEM_MAPPED: u32 = 0x40000;
 #[derive(Copy, Clone)]
 pub struct DolphinMemory {
     process_handle: Option<HANDLE>,
-    dolphin_base_addr: Option<usize>,
-    dolphin_addr_size: Option<usize>
+    dolphin_base_address: Option<usize>,
+    dolphin_address_size: Option<usize>
 }
 
 pub fn init_memory_read() -> DolphinMemory {
@@ -126,7 +126,7 @@ fn find_gamecube_ram_offset(process_handle: Option<HANDLE>) -> (Option<usize>, O
 
 impl DolphinMemory {
     pub fn new(process_handle: Option<HANDLE>, dolphin_base_address: Option<usize>, dolphin_address_size: Option<usize>) -> Self {
-        DolphinMemory { process_handle: process_handle, dolphin_base_addr: dolphin_base_address, dolphin_addr_size: dolphin_address_size }
+        DolphinMemory { process_handle, dolphin_base_address, dolphin_address_size }
     }
 
     pub fn read<T: Sized>(self, addr: u32) -> Option<T> where [u8; mem::size_of::<T>()]:{
@@ -138,7 +138,7 @@ impl DolphinMemory {
 		    return None;
         }
 
-        let raddr = self.dolphin_base_addr.unwrap() as u32 + addr;
+        let raddr = self.dolphin_base_address.unwrap() as u32 + addr;
         let mut output = [0u8; mem::size_of::<T>()];
         let size = mem::size_of::<T>();
         let mut memread: usize = 0;
