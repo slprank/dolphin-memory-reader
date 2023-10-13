@@ -21,3 +21,7 @@ readFromMemory() {
 ### Info
 
 Package is written in rust and is currently only supported for windows tested on `Super Smash Bros Melee`
+
+### Contribute?
+
+To be able to run this project locally you will need to have `Rust` installed on your computer with `Nightly`
