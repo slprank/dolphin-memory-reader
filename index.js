@@ -9,9 +9,9 @@ class DolphinMemory {
   read(address, length) {
     return memoryRead.call(this.memory, address, length);
   }
-  readString(address, chars) {
-    return memoryReadString.call(this.memory, address, chars);
-  }
+  // readString(address, chars) {
+  //   return memoryReadString.call(this.memory, address, chars);
+  // }
 }
 
 module.exports = DolphinMemory;

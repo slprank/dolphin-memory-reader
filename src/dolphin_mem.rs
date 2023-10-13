@@ -9,9 +9,7 @@ use neon::result::JsResult;
 use neon::types::Finalize;
 use neon::types::JsBox;
 use neon::types::JsNumber;
-use neon::types::JsPromise;
 use num_traits::FromPrimitive;
-use windows::Win32::Foundation::ERROR_PARTIAL_COPY;
 use windows::Win32::Foundation::GetLastError;
 use windows::Win32::System::Diagnostics::Debug::ReadProcessMemory;
 use windows::Win32::System::Memory::MEMORY_BASIC_INFORMATION;
@@ -30,75 +28,121 @@ const GC_RAM_SIZE: usize = 0x2000000;
 const MEM_MAPPED: u32 = 0x40000;
 
 
-
+#[derive(Copy, Clone)]
 pub struct DolphinMemory {
     process_handle: Option<HANDLE>,
     dolphin_base_addr: Option<usize>,
     dolphin_addr_size: Option<usize>
 }
 
-impl DolphinMemory {
-    pub fn new() -> Self {
-        DolphinMemory { process_handle: None, dolphin_base_addr: None, dolphin_addr_size: None }
-    }
+pub fn init_memory_read() -> DolphinMemory {
+    let mut process_handle: Option<HANDLE>  = None;
+    let mut dolphin_base_address: Option<usize>  = None;
+    let mut dolphin_address_size: Option<usize>  = None;
+    loop {
+        if process_handle.is_none() {
+            process_handle = find_process()
+        }
+        if process_handle.is_some() && dolphin_base_address.is_none() || dolphin_address_size.is_none() {
+            (dolphin_base_address, dolphin_address_size) = find_gamecube_ram_offset(process_handle)
+        }
 
-    pub fn find_process(&mut self) -> bool {
-        unsafe {
-            let mut status: u32 = 0;
-            let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0).unwrap();
-            let mut pe32 = PROCESSENTRY32 {
-                dwSize: mem::size_of::<PROCESSENTRY32>() as u32,
-                cntUsage: 0,
-                th32ProcessID: 0,
-                th32DefaultHeapID: 0,
-                th32ModuleID: 0,
-                cntThreads: 0,
-                th32ParentProcessID: 0,
-                pcPriClassBase: 0,
-                dwFlags: 0,
-                szExeFile: [0; 260]
-            };
-
-            loop {
-                if !Process32Next(snapshot, &mut pe32 as *mut _).as_bool() {
-                    break;
-                }
-                let name = from_utf8_unchecked(&pe32.szExeFile);
-                if VALID_PROCESS_NAMES.iter().any(|&e| name.starts_with(e)) {
-                    println!("{}", name);
-                    let handle_res = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, pe32.th32ProcessID);
-                    if handle_res.is_ok() {
-                        let handle = handle_res.unwrap();
-                        if GetExitCodeProcess(handle, &mut status as *mut _).as_bool() && status as i32 == STILL_ACTIVE.0 {
-                            self.process_handle = Some(handle);
-                            break;
-                        }
-                    } else {
-                        // ? handle is supposed to be null so what will be closed... ported from m-overlay, see reference on the top
-                        CloseHandle(handle_res.unwrap());
-                        self.process_handle = None;
-                    }
-                } else {
-                    self.process_handle = None;
-                }
-            }
-            CloseHandle(snapshot);
-            return self.has_process();
+        if process_handle.is_some() && dolphin_base_address.is_some() && dolphin_base_address.is_some() {
+            return DolphinMemory::new(process_handle, dolphin_base_address, dolphin_address_size)
         }
     }
+}
 
-    pub fn has_process(&self) -> bool {
+fn find_process() -> Option<HANDLE> {
+    unsafe {
+        let mut status: u32 = 0;
+        let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0).unwrap();
+        let mut pe32 = PROCESSENTRY32 {
+            dwSize: mem::size_of::<PROCESSENTRY32>() as u32,
+            cntUsage: 0,
+            th32ProcessID: 0,
+            th32DefaultHeapID: 0,
+            th32ModuleID: 0,
+            cntThreads: 0,
+            th32ParentProcessID: 0,
+            pcPriClassBase: 0,
+            dwFlags: 0,
+            szExeFile: [0; 260]
+        };
+
+        loop {
+            if !Process32Next(snapshot, &mut pe32 as *mut _).as_bool() {
+                break;
+            }
+            let name = from_utf8_unchecked(&pe32.szExeFile);
+            if VALID_PROCESS_NAMES.iter().any(|&e| name.starts_with(e)) {
+                println!("{}", name);
+                let handle_res = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, pe32.th32ProcessID);
+                if handle_res.is_ok() {
+                    let handle = handle_res.unwrap();
+                    if GetExitCodeProcess(handle, &mut status as *mut _).as_bool() && status as i32 == STILL_ACTIVE.0 {
+                        return Some(handle);
+                    }
+                } else {
+                    // ? handle is supposed to be null so what will be closed... ported from m-overlay, see reference on the top
+                    CloseHandle(handle_res.unwrap());
+                    return None;
+                }
+            } else {
+                return None;
+            }
+        }
+        CloseHandle(snapshot);
+        return None
+    }
+}
+
+fn find_gamecube_ram_offset(process_handle: Option<HANDLE>) -> (Option<usize>, Option<usize>) {
+    unsafe {
+        let mut info: MEMORY_BASIC_INFORMATION = Default::default();
+        let mut address: usize = 0;
+
+        while VirtualQueryEx(process_handle.unwrap(), Some(address as *const c_void), &mut info as *mut _, mem::size_of::<MEMORY_BASIC_INFORMATION>()) == mem::size_of::<MEMORY_BASIC_INFORMATION>() {
+            address = address + info.RegionSize / mem::size_of::<usize>();
+            // Dolphin stores the GameCube RAM address space in 32MB chunks.
+            // Extended memory override can allow up to 64MB.
+            if info.RegionSize >= GC_RAM_SIZE && info.RegionSize % GC_RAM_SIZE == 0 && info.Type.0 == MEM_MAPPED {
+                let mut wsinfo = PSAPI_WORKING_SET_EX_INFORMATION {
+                    VirtualAddress: 0 as *mut c_void,
+                    VirtualAttributes: PSAPI_WORKING_SET_EX_BLOCK { Flags: 0 }
+                };
+                wsinfo.VirtualAddress = info.BaseAddress;
+
+                if QueryWorkingSetEx(process_handle.unwrap(), &mut wsinfo as *mut _ as *mut c_void, mem::size_of::<PSAPI_WORKING_SET_EX_INFORMATION>().try_into().unwrap()).as_bool() {
+                    if (wsinfo.VirtualAttributes.Flags & 1) == 1 && info.BaseAddress != 0 as *mut c_void {
+                        // Return as an object
+                        return (Some(info.BaseAddress as usize), Some(info.RegionSize));
+                    }
+                }
+            }
+        }
+    }
+    return (None, None);
+}
+
+impl DolphinMemory {
+    pub fn new(process_handle: Option<HANDLE>, dolphin_base_address: Option<usize>, dolphin_address_size: Option<usize>) -> Self {
+        DolphinMemory { process_handle: process_handle, dolphin_base_addr: dolphin_base_address, dolphin_addr_size: dolphin_address_size }
+    }
+
+    
+    fn has_process(&self) -> bool {
         self.process_handle.is_some()
     }
 
-    pub fn check_process_running(&mut self) -> bool {
-        if self.process_handle.is_none() {
+    pub fn check_process_running(process_handle: Option<HANDLE>) -> bool {
+        if process_handle.is_none() {
             return false;
         }
 
         let mut status: u32 = 0;
         unsafe {
-            if GetExitCodeProcess(self.process_handle.unwrap(), &mut status as *mut _).as_bool() && status as i32 != STILL_ACTIVE.0 {
+            if GetExitCodeProcess(process_handle.unwrap(), &mut status as *mut _).as_bool() && status as i32 != STILL_ACTIVE.0 {
                 return false;
             }
         }
@@ -106,10 +150,6 @@ impl DolphinMemory {
     }
 
     pub fn read<T: Sized>(self, addr: u32) -> Option<T> where [u8; mem::size_of::<T>()]:{
-        if !self.has_process() || (!self.has_gamecube_ram_offset() && !self.find_gamecube_ram_offset()) {
-            return None;
-        }
-
         let mut addr = addr;
         if addr >= GC_RAM_START && addr <= GC_RAM_END {
             addr = addr % GC_RAM_START;
@@ -187,42 +227,7 @@ impl DolphinMemory {
 
     }*/
 
-    fn find_gamecube_ram_offset(self) -> bool {
-        if !self.has_process() {
-            return false;
-        }
-
-        unsafe {
-            let mut info: MEMORY_BASIC_INFORMATION = Default::default();
-            let mut address: usize = 0;
-
-            while VirtualQueryEx(self.process_handle.unwrap(), Some(address as *const c_void), &mut info as *mut _, mem::size_of::<MEMORY_BASIC_INFORMATION>()) == mem::size_of::<MEMORY_BASIC_INFORMATION>() {
-                address = address + info.RegionSize / mem::size_of::<usize>();
-                // Dolphin stores the GameCube RAM address space in 32MB chunks.
-		        // Extended memory override can allow up to 64MB.
-                if info.RegionSize >= GC_RAM_SIZE && info.RegionSize % GC_RAM_SIZE == 0 && info.Type.0 == MEM_MAPPED {
-                    let mut wsinfo = PSAPI_WORKING_SET_EX_INFORMATION {
-                        VirtualAddress: 0 as *mut c_void,
-                        VirtualAttributes: PSAPI_WORKING_SET_EX_BLOCK { Flags: 0 }
-                    };
-                    wsinfo.VirtualAddress = info.BaseAddress;
-
-                    if QueryWorkingSetEx(self.process_handle.unwrap(), &mut wsinfo as *mut _ as *mut c_void, mem::size_of::<PSAPI_WORKING_SET_EX_INFORMATION>().try_into().unwrap()).as_bool() {
-                        if (wsinfo.VirtualAttributes.Flags & 1) == 1 && info.BaseAddress != 0 as *mut c_void {
-                            self.dolphin_base_addr = Some(info.BaseAddress as usize);
-                            self.dolphin_addr_size = Some(info.RegionSize);
-
-                            println!("Dolphin Base Address: {:?}", self.dolphin_base_addr);
-                            println!("Dolphin Address Size: {:?}", self.dolphin_addr_size);
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
+    
 
     fn has_gamecube_ram_offset(&self) -> bool {
         self.dolphin_base_addr.is_some()
@@ -240,7 +245,7 @@ enum ByteSize {
 
 impl DolphinMemory {
     pub fn js_new(mut cx: FunctionContext) -> JsResult<JsBox<DolphinMemory>> {
-        let memory = DolphinMemory::new();
+        let memory = init_memory_read();
         Ok(cx.boxed(memory))
     }
     
@@ -279,6 +284,26 @@ impl DolphinMemory {
 
         Ok(memory_value)
     }
+    
+    // pub fn js_read_string(mut cx: FunctionContext) -> JsResult<JsString> {
+    //     let address_js = cx.argument::<JsNumber>(0)?.value(&mut cx);
+    //     let chars_js= cx.argument::<JsNumber>(1)?.value(&mut cx);
+
+    //     let address = u32::from_f64(address_js).unwrap();
+    //     let chars = usize::from_f64(chars_js).unwrap();
+
+    //     let memory = cx.this().downcast_or_throw::<JsBox<DolphinMemory>, _>(&mut cx)?;
+
+    //     let memory_string = {
+    //         let value = memory.read_string::<chars>(address);
+    //             match value {
+    //               Some(value_js) => cx.string(value_js),
+    //               None => {return cx.throw_error("rrRrorRRR")}
+    //             }
+    //     };
+
+    //     Ok(memory_string)
+    // }
 }
 
 impl Finalize for DolphinMemory {}
