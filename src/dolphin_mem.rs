@@ -48,9 +48,9 @@ enum ByteSize {
     U32 = 32,
 }
 
-struct DolphinMemoryFinder;
+struct DolphinMemoryFinderWindows;
 
-impl DolphinMemoryFinder {
+impl DolphinMemoryFinderWindows {
     fn find_process_handle() -> Option<HANDLE> {
         unsafe {
             let mut status: u32 = 0;
@@ -175,11 +175,11 @@ impl DolphinMemory {
     }
 
     pub fn init_with_process() -> Result<Self> {
-        let process_handle = DolphinMemoryFinder::find_process_handle()
+        let process_handle = DolphinMemoryFinderWindows::find_process_handle()
             .ok_or(anyhow!("cannot find dolphin process"))?;
 
         let (dolphin_base_address, dolphin_address_size) =
-            DolphinMemoryFinder::find_gamecube_ram_offset(process_handle)
+            DolphinMemoryFinderWindows::find_gamecube_ram_offset(process_handle)
                 .ok_or(anyhow!("cannot find gamecube ram offset"))?;
 
         Ok(Self::new(
