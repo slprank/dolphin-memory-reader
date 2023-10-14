@@ -2,12 +2,13 @@
   "name": "dolphin-memory-reader",
   "version": "0.1.2",
   "description": "Node module that can read memory from the Dolphin Emulator",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "cargo build --message-format=json-render-diagnostics --out-dir . -Z unstable-options",
+    "build": "npm run compile:ts && cargo build --message-format=json-render-diagnostics --out-dir . -Z unstable-options",
     "build-debug": "npm run build",
-    "build-release": "npm run build -- --release && ls && mv dolphin_memory_reader.dll index.node",
+    "build-release": "npm run build -- --release && ls && mv dolphin_memory_reader.dll dist/index.node --force && cp dist/index.node src/node/index.node --force",
     "install:git": "rustup default nightly && npm run build-release",
+    "compile:ts": "tsc --p ./tsconfig.json",
     "test": "cargo +nightly test"
   },
   "author": "sindrevatnaland97@gmail.com",
@@ -23,8 +24,7 @@
   ],
   "files": [
     "./index.node",
-    "index.js",
-    "index.d.ts"
+    "./dist/**/*"
   ],
   "devDependencies": {
     "cargo-cp-artifact": "0.1.8",

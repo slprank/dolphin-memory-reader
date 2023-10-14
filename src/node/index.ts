@@ -1,17 +1,18 @@
-const { memoryNew, memoryRead } = require("./index.node");
+import { ByteSize } from "./types/enum";
+
+const { memoryNew, memoryRead } = require("../../index.node");
 
 // Wrapper class for the boxed `Database` for idiomatic JavaScript usage
-class DolphinMemory {
+export default class DolphinMemory {
+  memory;
   constructor() {
     this.memory = memoryNew();
   }
 
-  read(address, byteSize = 8) {
+  read(address: number, byteSize: ByteSize = ByteSize.U8) {
     return memoryRead.call(this.memory, address, byteSize);
   }
   // readString(address, chars) {
   //   return memoryReadString.call(this.memory, address, chars);
   // }
 }
-
-module.exports = DolphinMemory;

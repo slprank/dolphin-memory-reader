@@ -75,11 +75,12 @@ impl DolphinMemoryFinderWindows {
                 }
 
                 let name = from_utf8_unchecked(&pe32.szExeFile);
+
                 if !VALID_PROCESS_NAMES
                     .iter()
                     .any(|&valid_process_name| name.starts_with(valid_process_name))
                 {
-                    break None;
+                    continue;
                 };
 
                 let handle = match OpenProcess(

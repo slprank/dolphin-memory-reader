@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "target": "ES6", // Or your target environment
+    "module": "CommonJS", // Or your preferred module system
+    "outDir": "./dist", // Output directory for compiled files
+    "rootDir": "./src/node", // Root directory of your TypeScript source files
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/node/**/*.ts", "src/node/index.ts"],
+  "exclude": ["node_modules"]
+}
