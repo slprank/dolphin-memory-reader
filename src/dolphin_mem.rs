@@ -277,7 +277,7 @@ impl DolphinMemoryJs {
 
         let memory = cx
             .this()
-            .downcast_or_throw::<JsBox<DolphinMemory>, _>(&mut cx)?;
+            .downcast_or_throw::<JsBox<DolphinMemoryJs>, _>(&mut cx)?.dolphin_memory;
 
         const READ_ERROR_MESSAGE: &str = "failed reading from address";
         let memory_value = match byte_size {
