@@ -1,6 +1,6 @@
 {
   "name": "dolphin-memory-reader",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Node module that can read memory from the Dolphin Emulator",
   "main": "dist/index.js",
   "scripts": {
@@ -11,7 +11,17 @@
     "compile:ts": "tsc --p ./tsconfig.json",
     "test": "cargo +nightly test"
   },
-  "author": "sindrevatnaland97@gmail.com",
+  "authors": "sindrevatnaland97@gmail.com",
+  "contributors": [
+    {
+      "name": "FluentCoding",
+      "url": "https://github.com/FluentCoding"
+    },
+    {
+      "name": "Joffe97",
+      "url": "https://github.com/joffe97"
+    }
+  ],
   "url": "https://github.com/slprank/dolphin-memory-reader",
   "repository": {
     "type": "git",
