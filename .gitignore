@@ -6,3 +6,4 @@ dolphin_memory_reader.dll
 dolphin_memory_reader.dll.exp
 dolphin_memory_reader.dll.lib
 dolphin_memory_reader.pdb
+package-lock.json
