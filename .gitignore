@@ -1,5 +1,6 @@
 /target
 /node_modules
+/dist
 index.node
 dolphin_memory_reader.dll
 dolphin_memory_reader.dll.exp
