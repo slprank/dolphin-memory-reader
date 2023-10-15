@@ -6,18 +6,27 @@ const { memoryNew, memoryRead } = require("./index.node");
 export default class DolphinMemory {
   memory;
   constructor() {
-    this.memory = memoryNew();
+    try {
+      this.memory = memoryNew();
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  read(address: number, byteSize: ByteSize = ByteSize.U8) {
+  read(address: number, byteSize: ByteSize = ByteSize.U8): number {
     try {
       return memoryRead.call(this.memory, address, byteSize);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
+    throw new Error("Cannot read from memory");
   }
-  //
-  // readString(address, chars) {
-  //   return memoryReadString.call(this.memory, address, chars);
-  // }
+
+  readString(address: number, chars: number) {
+    const byteArray = [...Array(chars).keys()].map((i: number) =>
+      this.read(address + ByteSize.U8 * i, ByteSize.U8)
+    );
+    const charArray = String.fromCharCode(...byteArray);
+    return charArray;
+  }
 }
