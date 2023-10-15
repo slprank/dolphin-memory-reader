@@ -10,9 +10,13 @@ export default class DolphinMemory {
   }
 
   read(address: number, byteSize: ByteSize = ByteSize.U8) {
-    console.log("Reading:", address, byteSize);
-    return memoryRead.call(this.memory, address, byteSize);
+    try {
+      return memoryRead.call(this.memory, address, byteSize);
+    } catch (err) {
+      console.log(err);
+    }
   }
+  //
   // readString(address, chars) {
   //   return memoryReadString.call(this.memory, address, chars);
   // }
