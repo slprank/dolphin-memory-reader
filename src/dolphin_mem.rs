@@ -46,6 +46,7 @@ enum ByteSize {
     U8 = 8,
     U16 = 16,
     U32 = 32,
+    U32Float = 33,
 }
 
 struct DolphinMemoryFinderWindows;
@@ -297,6 +298,13 @@ impl DolphinMemoryJs {
             }
             ByteSize::U32 => {
                 let value = memory.read::<u32>(address);
+                match value {
+                    Some(value_js) => cx.number(value_js),
+                    None => return cx.throw_error(READ_ERROR_MESSAGE),
+                }
+            }
+            ByteSize::U32Float => {
+                let value = memory.read::<f32>(address);
                 match value {
                     Some(value_js) => cx.number(value_js),
                     None => return cx.throw_error(READ_ERROR_MESSAGE),
