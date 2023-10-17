@@ -1,21 +1,31 @@
 import { clearInterval } from "timers";
 import { ByteSize } from "./types/enum";
-
-const { memoryNew, memoryRead } = require("./index.node");
+import os from "os";
 
 // Wrapper class for the boxed `Database` for idiomatic JavaScript usage
 export default class DolphinMemory {
   memory: DolphinMemory | undefined;
+  memoryNew: Function;
+  memoryRead: Function;
   constructor() {
     this.memory = undefined;
+    if (os.platform() === "win32") {
+      const { memoryNew, memoryRead } = require("./index.node");
+      this.memoryNew = memoryNew;
+      this.memoryRead = memoryRead;
+    } else {
+      throw Error("Cannot use a non-windows OS");
+    }
   }
+
+  getIndexFile() {}
 
   async init() {
     if (this.memory) return;
     await new Promise((resolve) => {
       const interval = setInterval(() => {
         try {
-          this.memory = memoryNew();
+          this.memory = this.memoryNew();
           if (this.memory) {
             resolve(undefined);
             clearInterval(interval);
@@ -30,7 +40,7 @@ export default class DolphinMemory {
   read(address: number, byteSize: ByteSize = ByteSize.U8): number {
     try {
       if (!this.memory) throw new Error("Dolphin memory not initialized");
-      return memoryRead.call(this.memory, address, byteSize);
+      return this.memoryRead.call(this.memory, address, byteSize);
     } catch (err) {
       console.error(err);
     }
