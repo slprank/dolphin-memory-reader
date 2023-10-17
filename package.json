@@ -1,6 +1,6 @@
 {
   "name": "dolphin-memory-reader",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Node module that can read memory from the Dolphin Emulator",
   "main": "dist/index.js",
   "scripts": {
@@ -30,7 +30,10 @@
   "license": "MIT",
   "keywords": [
     "memory",
-    "process"
+    "process",
+    "dolphin",
+    "emulator",
+    "read"
   ],
   "files": [
     "./index.node",
