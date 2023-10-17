@@ -1,20 +1,31 @@
+import { clearInterval } from "timers";
 import { ByteSize } from "./types/enum";
 
 const { memoryNew, memoryRead } = require("./index.node");
 
 // Wrapper class for the boxed `Database` for idiomatic JavaScript usage
 export default class DolphinMemory {
-  memory;
+  memory: DolphinMemory | undefined;
   constructor() {
-    try {
-      this.memory = memoryNew();
-    } catch (err) {
-      console.error(err);
-    }
+    this.memory = undefined;
+  }
+
+  async init() {
+    if (this.memory) return;
+    await new Promise((resolve) => {
+      const interval = setInterval(() => {
+        this.memory = memoryNew();
+        if (this.memory) {
+          resolve(undefined);
+          clearInterval(interval);
+        }
+      }, 1000);
+    });
   }
 
   read(address: number, byteSize: ByteSize = ByteSize.U8): number {
     try {
+      if (!this.memory) throw new Error("Dolphin memory not initialized");
       return memoryRead.call(this.memory, address, byteSize);
     } catch (err) {
       console.error(err);

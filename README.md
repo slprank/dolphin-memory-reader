@@ -6,16 +6,18 @@
 import DolphinMemory, { ByteSize } from "dolphin-memory-reader";
 import os from "os"
 
-readFromMemory() {
+async readFromMemory() {
     if (os.platform() !== "win32") return;
 
-    // Throws error if dolphin is not running
     const memory = new DolphinMemory();
+
+    // Looks for a running process once every second
+    await memory.init();
 
     // Current stage Id address
     const address = 0x8049e6c8 + 0x88 + 0x03;
 
-    // Throws error if not able to read memory address or dolphin is no longer active when called
+    // Catches error if not able to read memory address or dolphin is no longer active when called
     const byte = memory.read(address, ByteSize.U8);
 
     console.log("Byte from memory", byte);
