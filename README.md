@@ -3,7 +3,8 @@
 ### Initialize
 
 ```ts
-import DolphinMemory, { ByteSize } from "dolphin-memory-reader";
+import DolphinMemory from "dolphin-memory-reader";
+import { ByteSize } from 'dolphin-memory-reader/dist/types/enum';
 import os from "os"
 
 async readFromMemory() {
@@ -17,7 +18,7 @@ async readFromMemory() {
     // Current stage Id address
     const address = 0x8049e6c8 + 0x88 + 0x03;
 
-    // Catches error if not able to read memory address or dolphin is no longer active when called
+    // Throws error if not able to read memory address or dolphin is no longer active when called
     const byte = memory.read(address, ByteSize.U8);
 
     console.log("Byte from memory", byte);

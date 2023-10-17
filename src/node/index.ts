@@ -38,20 +38,15 @@ export default class DolphinMemory {
   }
 
   read(address: number, byteSize: ByteSize = ByteSize.U8): number {
-    try {
-      if (!this.memory) throw new Error("Dolphin memory not initialized");
-      return this.memoryRead.call(this.memory, address, byteSize);
-    } catch (err) {
-      console.error(err);
-    }
-    throw new Error("Cannot read from memory");
+    if (!this.memory) throw new Error("Dolphin memory not initialized");
+    return this.memoryRead.call(this.memory, address, byteSize);
   }
 
-  readString(address: number, chars: number) {
+  readString(address: number, chars: number): string | undefined {
     const byteArray = [...Array(chars).keys()].map((i: number) =>
       this.read(address + ByteSize.U8 * i, ByteSize.U8)
     );
-    const charArray = String.fromCharCode(...byteArray);
+    const charArray = String.fromCharCode(...(byteArray as number[]));
     return charArray;
   }
 }
