@@ -14,10 +14,14 @@ export default class DolphinMemory {
     if (this.memory) return;
     await new Promise((resolve) => {
       const interval = setInterval(() => {
-        this.memory = memoryNew();
-        if (this.memory) {
-          resolve(undefined);
-          clearInterval(interval);
+        try {
+          this.memory = memoryNew();
+          if (this.memory) {
+            resolve(undefined);
+            clearInterval(interval);
+          }
+        } catch (err) {
+          console.error(err);
         }
       }, 1000);
     });
