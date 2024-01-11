@@ -40,7 +40,7 @@ export default class DolphinMemory {
   read(address: number, byteSize: ByteSize = ByteSize.U8): number {
     if (!this.memory) throw new Error("Dolphin memory not initialized");
     const value = this.memoryRead.call(this.memory, address, byteSize);
-    if (typeof value !== "number") throw new Error("Failed to read memory");
+    console.log("value:", value);
     return value;
   }
 
