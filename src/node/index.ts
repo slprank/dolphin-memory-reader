@@ -14,11 +14,11 @@ export default class DolphinMemory {
       this.memoryNew = memoryNew;
       this.memoryRead = memoryRead;
     } else {
-      throw Error("Cannot use a non-windows OS");
+      throw Error("Non Windows OS not supported");
     }
   }
 
-  getIndexFile() {}
+  getIndexFile() { }
 
   async init() {
     if (this.memory) return;
@@ -39,7 +39,11 @@ export default class DolphinMemory {
 
   read(address: number, byteSize: ByteSize = ByteSize.U8): number {
     if (!this.memory) throw new Error("Dolphin memory not initialized");
-    return this.memoryRead.call(this.memory, address, byteSize);
+    try {
+      return this.memoryRead.call(this.memory, address, byteSize);
+    } catch {
+      throw new Error("Failed to read memory");
+    }
   }
 
   readString(address: number, chars: number): string | undefined {

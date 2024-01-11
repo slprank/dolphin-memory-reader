@@ -31,8 +31,8 @@ extern crate num;
 
 const VALID_PROCESS_NAMES: &'static [&'static str] = &[
     "Dolphin.exe",
-    "Slippi Dolphin.exe",
     "Slippi_Dolphin.exe",
+    "Slippi Dolphin.exe",
     "DolphinWx.exe",
     "DolphinQt2.exe",
     "Citrus Dolphin.exe",

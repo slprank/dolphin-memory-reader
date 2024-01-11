@@ -1,6 +1,6 @@
 {
   "name": "dolphin-memory-reader",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Node module that can read memory from the Dolphin Emulator",
   "main": "dist/index.js",
   "scripts": {
