@@ -198,16 +198,13 @@ impl DolphinMemory {
     {
         let mut addr = addr;
         if addr >= GC_RAM_START && addr <= GC_RAM_END {
-            addr = addr % GC_RAM_START;
+            addr -= GC_RAM_START;
         } else {
-            println!(
-                "[MEMORY] Attempt to read from invalid address {:#08x}",
-                addr
-            );
+            println!("[MEMORY] Attempt to read from invalid address {:#08x}", addr);
             return None;
         }
 
-        let raddr = self.dolphin_base_address as u32 + addr;
+        let raddr = self.dolphin_base_address as usize + addr as usize;
         let mut output = [0u8; mem::size_of::<T>()];
         let size = mem::size_of::<T>();
         let mut memread: usize = 0;

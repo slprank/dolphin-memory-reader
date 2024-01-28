@@ -27,8 +27,8 @@ export default class DolphinMemory {
         try {
           this.memory = this.memoryNew();
           if (this.memory) {
-            resolve(undefined);
             clearInterval(interval);
+            resolve(undefined);
           }
         } catch (err) {
           console.error(err);
